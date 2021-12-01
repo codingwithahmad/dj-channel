@@ -10,4 +10,4 @@ def echo_image(request):
 	return render(request, 'echo/echo_image.html')
 
 def join_chat(request, username):
-	return render(request, 'echo/join_chat.html', {'username_json': mark_safe(json.dump(username))})
+	return render(request, 'echo/join_chat.html', {'username_json': mark_safe(json.dumps(username))})
