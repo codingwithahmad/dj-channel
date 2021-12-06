@@ -11,8 +11,19 @@ import json
 
 class EchoConsumer(WebsocketConsumer):
 	def connect(self):
+		self.room_id = "echo_1"
+
+		async_to_sync(self.channel_layer.group_add)(
+			self.room_id,
+			self.channel_name
+		)
 		self.accept()
 
+	def disconnect(self, close_code):
+		async_to_sync(self.channel_layer.group_discard)(
+			self.room_id,
+			self.channel_name
+		)
 
 	# def receive(self, text_data=None, bytes_data=None):
 	# 	self.send(text_data=text_data)
@@ -23,9 +34,12 @@ class EchoConsumer(WebsocketConsumer):
 			self.send(bytes_data=bytes_data)
 
 
+	def echo_message(self, event):
+		message = event['message']
 
-	def disconnect(self, close_code):
-		pass
+
+		self.send(text_data=message)
+
 
 class ChatConsumer(AsyncWebsocketConsumer):
 	async def connect(self):
@@ -57,6 +71,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
 				user_group_name,
 					{
 						'type': 'chat_message',
+						'message': text_data
+					}
+				)
+			await self.channel_layer.group_send(
+				'echo_1',
+					{
+						'type': 'echo_message',
 						'message': text_data
 					}
 				)
@@ -101,6 +122,14 @@ class CustomChatConsumer(AsyncConsumer):
 				user_group_name,
 					{
 						'type': 'chat_message',
+						'message': text_data
+					}
+				)
+
+			await self.channel_layer.group_send(
+				'echo_1',
+					{
+						'type': 'echo_message',
 						'message': text_data
 					}
 				)
