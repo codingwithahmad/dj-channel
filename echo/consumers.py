@@ -14,7 +14,10 @@ class EchoConsumer(WebsocketConsumer):
 		self.room_id = "echo_1"
 		self.user = self.scope['user']
 
-		if self.user.is_authenticated:
+		self.scope['session']['test'] = 1
+		self.scope['session'].save()
+
+		if self.user.is_superuser:
 			async_to_sync(self.channel_layer.group_add)(
 				self.room_id,
 				self.channel_name
