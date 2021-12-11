@@ -8,6 +8,7 @@ from channels.exceptions import StopConsumer
 from channels.consumer import SyncConsumer, AsyncConsumer
 from asgiref.sync import async_to_sync
 import json
+import urllib.parse as urlparse
 
 class EchoConsumer(WebsocketConsumer):
 	def connect(self):
@@ -16,6 +17,14 @@ class EchoConsumer(WebsocketConsumer):
 
 		self.scope['session']['test'] = 1
 		self.scope['session'].save()
+
+		query = self.scope['query_string']
+		params = urlparse.parse_qs(query.decode('UTF-8'))
+
+		name = params.get('name', [None])[0]
+		version = params.get('version', [None])[0]
+
+		print(name, version)
 
 		if self.user.is_superuser:
 			async_to_sync(self.channel_layer.group_add)(
